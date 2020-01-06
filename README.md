@@ -10,6 +10,7 @@ OpenBlog项目更像是一个基于flask_appbuilder开源运营框架的组织�
 3. 封装成小程序数据接口及运营端板块功能
 
 ###2.当前开源部分为组织内部文本库（博客）功能
+项目演示地址：[https://www.dogsrun.cn/](https://www.dogsrun.cn/ "https://www.dogsrun.cn/")
 ####博客项目依赖于：
 1. flask_appbuilder：[API参考](https://flask-appbuilder.readthedocs.io/en/latest/config.html#using-config-py "API参考")
 2. 一款开源的、可嵌入的 Markdown 在线编辑器（组件）：[Editor.md](https://pandao.github.io/editor.md/ "Editor.md")
