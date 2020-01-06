@@ -1,0 +1,19 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+    {% if msg %}
+        <h2>
+            <center>{{ msg }}
+                <center>
+        </h2>
+
+    {% elif not  msg %}
+        <h2>
+            <center>{{ _('Page not found') }}
+                <center>
+        </h2>
+    {% endif %}
+
+{% endblock %}
+
+

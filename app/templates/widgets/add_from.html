@@ -1,0 +1,276 @@
+{% extends "appbuilder/base.html" %}
+{% import 'appbuilder/general/lib.html' as lib %}
+{% block content %}
+{{ lib.panel_begin(title) }}
+{% block add_form %}
+<link rel="stylesheet" href="{{ url_for('static', filename='editor_md/examples/css/style.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='editor_md/css/editormd.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/switch.css') }}"/>
+<script src="{{ url_for('static', filename='base.js') }}"/>
+<script src="{{ url_for('static', filename='editor_md/examples/js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='editor_md/editormd.js') }}"></script>
+<script src="{{ url_for('static', filename='editor_md/plugins/image-handle-paste/image-handle-paste.js') }}"></script>
+<link rel="shortcut icon" href="https://pandao.github.io/editor.md/favicon.ico" type="image/x-icon"/>
+
+<style>
+
+.top{
+    display: none;
+}
+
+.container{
+ width: 90%;
+}
+    .dropdown-header {
+        width: 100%;
+        margin-bottom: 10px;
+        flex-direction:row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+    }
+
+      .mytitle {
+          display: inline;
+          width: 75%;
+        margin-bottom: 10px;
+    }
+      .mytype{
+          width: 20%;
+      }
+
+    .mybtn {
+        padding: 6px 10px;
+    }
+     .addButton{
+        font-size: 1.4rem;
+        color: #ffffff;
+        background-color:#337ab7 ;
+        font-weight: bold;
+    }
+     #modeladdButton{
+        background:#337ab7 ;
+        color: #ffffff;
+    }
+
+    #desertButton{
+       background: #999999;
+        color: #666666;
+    }
+     .editormd-fullscreen{
+        z-index: 999999;
+    }
+
+</style>
+<form action="/publish" method="post">
+
+    <div class="btn-group  dropdown-header ">
+              <input id="title_input" type="text" class="form-control mytitle " placeholder="文本标题">
+        <input type="text" id="input_type" class="btn mybtn mytype" placeholder="笔记类型" disabled required>
+        <button type="button" class="btn  dropdown-toggle mybtn " data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">切换下拉菜单</span>
+        </button>
+
+
+        <ul class="dropdown-menu" id="type_ul" role="menu">
+            <!--<li><a href="#">功能</a></li>-->
+        </ul>
+    </div>
+    <div id="test-editormd">
+        <textarea name="TextContent" id="TextContent"></textarea>
+    </div>
+
+</div>
+    <!--<button class="addButton" type="button" value="发布博客">发布博客</button>-->
+     <div class="well well-sm buttondiv">
+           <button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
+                            <div class="handle"></div>
+      </button>
+         <button id="fat-btn" class="btn  btn-sm  addButton"  data-loading-text="Loading..."
+   	type="button"> 发布博客 <i class="fa fa-save"></i></button>
+         <a  id="hrefa" class="btn btn-sm btn-default" data-toggle="tooltip" rel="tooltip"
+       title="{{_('Back')}}">
+        <i class="fa fa-arrow-left"></i>
+    </a>
+    </div>
+
+    <!--<input type="reset" name="reset" value="重置">-->
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <h4 class="modal-body">
+        是否保存为草稿
+      </h4>
+      <div class="modal-footer">
+        <button id="desertButton" type="button" class="btn btn-default" data-dismiss="modal">遗弃</button>
+        <button id="modeladdButton" type="button" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/img_ondrop.js') }}"></script>
+<script type="text/javascript">
+    $(function () {
+        var typeData = {{ widgets.get('notes_type') | tojson}};
+         var user_id = {{ widgets.get('user_id') | tojson}};
+        $.each(typeData, function (i, item) {
+            console.log(i,item)
+            $('#type_ul').append('<li  value="' + i + '"><a value="' + i + '" >' + item + '</a></li>');
+        });
+
+        $('#hrefa').click(function () {
+           $('#myModal').modal('show');
+        });
+
+          $('#desertButton').click(function () {
+            history.go(-1);
+        });
+
+           $('#modeladdButton').click(function () {
+               $('#myModal').modal('hide');
+                var input_type = null
+             var title_input = null
+             var TextContent = null
+            if($('#input_type').val()!=''){
+                 input_type = $('#input_type').val()
+            }
+             if($('#title_input').val()!=''){
+                    title_input = $('#title_input').val()
+            }
+            if($('#TextContent').val()!=''){
+                    TextContent = $('#TextContent').val()
+            }
+                if(input_type!=null && title_input!=null && TextContent!=null){
+                addAjax(3);
+             }else{
+                 addAjax_warn();
+                }
+        });
+
+
+        $('body').on("click", '#type_ul li ', function () {
+            var li_text = $(this).children().html();
+            var li_value = $(this).attr('value');
+            $('#input_type').val(li_text);
+            $('#input_type').attr('value', li_value);
+        });
+        $('.addButton').click(function () {
+            var input_type = null
+             var title_input = null
+             var TextContent = null
+            if($('#input_type').val()!=''){
+                 input_type = $('#input_type').val()
+            }
+             if($('#title_input').val()!=''){
+                    title_input = $('#title_input').val()
+            }
+            if($('#TextContent').val()!=''){
+                    TextContent = $('#TextContent').val()
+            }
+
+            if(input_type!=null && title_input!=null && TextContent!=null){
+                addAjax(0);
+             }else{
+                 addAjax_warn();
+                }
+            });
+
+  function addAjax(state) {
+                $('#hrefa').attr('disabled',"true");
+                var  blogs_type = $('.btn-toggle').attr('aria-pressed');
+                $('.addButton').button('loading').delay(1000).queue(function() {
+                    $.ajax({
+                                                        type: "POST",
+                                                        contentType: "application/json;charset=utf-8",
+                                                        url: "/publish",
+                                                        data: JSON.stringify({
+                                                            'notestype': $('#input_type').attr('value'),
+                                                            'title': $('#title_input').val(),
+                                                            'seo_link': '',
+                                                            'notesState': state,
+                                                            'user_id':user_id,
+                                                            'blogs_type':blogs_type,
+                                                            'body_html': $('#TextContent').val(),
+                                                        }),
+                                                        success: function (res) {
+                                                              setTimeout(function(){
+                                                                     if (res['status'] == 0) {
+                                                                          $('.addButton').button('reset');
+                                                                          $('.addButton').dequeue();
+                                                               window.location.href ="javascript:history.go(-1)";
+                                                            }
+                                                                        },short_time);
+
+                                                        }
+                                                    });
+                     });
+    }
+
+    function addAjax_warn() {
+                if($("#warning").length == 0 ){
+                     $('.buttondiv').before(' <div id="warning" class="container">\n' +
+                                  '\t<div class="row clearfix">\n' +
+                                  '\t\t<div class="col-md-12 column">\n' +
+                                  '\t\t\t<div class="alert alert-dismissable alert-danger">\n' +
+                                  '\t\t\t\t <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>\n' +
+                                  '\t\t\t\t<h4>\n' +
+                                  '\t\t\t\t\t⚠️\n' +
+                                  '\t\t\t\t</h4> <strong>警告!</strong> 笔记类型，标题和内容不能为空\n' +
+                                  '\t\t\t</div>\n' +
+                                  '\t\t</div>\n' +
+                                  '\t</div>')
+                }
+
+                setTimeout(function(){
+                    $('#warning').remove()
+                        },warning_time);
+        }
+        var testEditor = editormd("test-editormd", {
+            width: "100%",
+            height: 800,
+            markdown: "",
+            path: '/static/editor_md/lib/',
+            htmlDecode : true,   //解码html属性  Decode all html tags & attributes，
+            //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为 true
+            //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为 true
+            //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为 true
+            //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为 0.1
+            //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为 #fff
+            imageUpload: true,
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp","mp4"],
+            imageUploadURL: "{{url_for('uploads')}}",
+
+            /*
+             上传的后台只需要返回一个 JSON 数据，结构如下：
+             {
+                success : 0 | 1,           // 0 表示上传失败，1 表示上传成功
+                message : "提示的信息，上传成功或上传失败及错误信息等。",
+                url     : "图片地址"        // 上传成功时才返回
+             }
+             */
+        });
+                getEditormd(testEditor,"{{url_for('uploads')}}")
+
+        	testEditor.imagePaste();//使用该插件
+
+         testEditor.config({
+                        tocDropdown   : true,
+                        tocTitle      : "目录 Table of Contents",
+               });//TOC下拉菜单
+
+        testEditor.config("syncScrolling", "single");
+
+
+
+    });
+</script>
+
+{% endblock %}
+
+{{ lib.panel_end() }}
+{% endblock %}

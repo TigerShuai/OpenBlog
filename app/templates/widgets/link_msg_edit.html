@@ -1,0 +1,189 @@
+{% extends "appbuilder/base.html" %}
+{% import 'appbuilder/general/lib.html' as lib %}
+
+{% block content %}
+{{ lib.panel_begin(title) }}
+<style type="text/css">
+    .divMainDiv {
+        width: 100%;
+        padding: 8px;
+        height: auto;
+    }
+
+    .title_span {
+        font-size: 1.8rem;
+        color: #337ab7;
+    }
+
+    .titleDiv {
+        width: auto;
+        height: auto;
+        display: inline-block;
+    }
+
+    .link_item_input {
+        /*width: -moz-calc(100% - 21%);*/
+        /*width: -webkit-calc(100% - 21%);*/
+        /*width: calc(100% - 21%);*/
+        display: inline-block;
+    }
+</style>
+<div class="divMainDiv">
+    <div class="titleDiv ">
+        <span class="title_span">今日跟进结果：</span>
+        <a href="{{widgets.get('trackingAdd') }}" class="btn btn-sm btn-primary" data-toggle="tooltip" rel="tooltip" title=""
+           data-original-title="添加新记录">
+            <i class="fa fa-plus"></i>
+        </a>
+    </div>
+    <div class="btn-group link_item_input">
+        <button class="btn btn-default buttonInput" value="1">用户已注册未认证</button>
+        <button data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {% for dict in widgets.get('link_item') %}
+            {% for k,v in dict.items() %}
+            <li class="link_li" value="{{k}}">
+                <a>{{v}}</a>
+            </li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="well well-sm">
+    <button type="submit" class="btn  btn-sm btn-primary addlink">{{_("Save")}}
+        <i class="fa fa-save"></i></button>
+
+ <a href="{{widgets.get('appuserlink')}}" class="btn btn-sm btn-primary" data-toggle="tooltip" rel="tooltip" title=""
+           >
+            <!--<i class="fa fa-plus"></i>-->
+     <i class="glyphicon glyphicon-search">沟通历史记录</i>
+        </a>
+    {{ lib.lnk_back() }}
+</div>
+
+
+
+<div id="myAlert" style="display: none" class="alert alert-success">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <strong>成功！</strong>跟进状态保存成功。
+</div>
+
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script >
+    var UserId = {{ widgets.get('UserId') | tojson }};
+    var appUserId =  {{ widgets.get('appUserId') | tojson }};
+    var dbType =  {{ widgets.get('dbType') | tojson }};
+    $('.link_li').click(function (e) {
+        var child_text = $(this).children().text();
+        $('.buttonInput').text(child_text);
+        $('.buttonInput').attr('value', $(this).attr('value'));
+    })
+
+    $('.addlink').click(function (e) {
+        $.ajax({
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            url: "/tracking",
+            data: JSON.stringify({
+                'appUserid': appUserId,
+                'user_id': UserId,
+                'dbType':dbType,
+                'nodeMsgid': $('.buttonInput').attr('value'),
+            }),
+            success: get_response
+        })
+    });
+
+    function get_response(res) {
+       if(res['status'] == 0 ){
+            $('#myAlert').css('display','block');
+        setTimeout(function(){
+        $('#myAlert').css('display','none');
+                            },2000);
+       }
+
+    }
+</script>
+
+<!--{% if related_views is defined %}-->
+<!--<ul class="nav nav-tabs">-->
+<!--<li class="active"><a href="#Home" data-toggle="tab">{{ _("Detail") }}</a> </li>-->
+<!--{% for view in related_views %}-->
+<!--<li><a href="#{{view.__class__.__name__}}" data-toggle="tab">{{view.title}}</a></li>-->
+<!--{% endfor %}-->
+<!--</ul>-->
+
+<!--<div class="tab-content">-->
+<!--{% for view in related_views %}-->
+<!--<div id="{{view.__class__.__name__}}" class="tab-pane">-->
+<!--{{ widgets.get('related_views')[loop.index - 1]()|safe }}-->
+<!--</div>-->
+<!--{% endfor %}-->
+<!--{% endif %}-->
+
+<!--{% block edit_form %}-->
+<!--<div id="Home" class="tab-pane active">-->
+<!--{{ widgets.get('edit')(form_action=form_action)|safe }}-->
+<!--</div>-->
+
+<!--{% endblock %}-->
+
+<!--{% if related_views is defined %} </div> {% endif %}-->
+
+<!--{{ lib.panel_end() }}-->
+<!--{% endblock %}-->
+
+<!--{% block add_tail_js %}-->
+<!--<script src="{{url_for('appbuilder.static',filename='js/ab_keep_tab.js')}}"></script>-->
+<!--{% endblock %}-->
+
+
+<!--{% if form_action is defined %}-->
+<!--<form action="{{form_action}}" method="post" enctype="multipart/form-data">-->
+<!--{% else %}-->
+<!--<form id="model_form" action="" method="post" enctype="multipart/form-data">-->
+<!--{% endif %}-->
+<!--{{form.hidden_tag()}}-->
+
+<!--{% if fieldsets %}-->
+<!--{% for fieldset_item in fieldsets %}-->
+<!--{% if fieldset_item[1].get('expanded') == None %}-->
+<!--{% set expanded = True %}-->
+<!--{% else %}-->
+<!--{% set expanded = fieldset_item[1].get('expanded') %}-->
+<!--{% endif %}-->
+<!--{% call lib.accordion_tag(loop.index,fieldset_item[0], expanded) %}-->
+<!--<div class="table-responsive">-->
+<!--<table class="table table-responsive table-bordered">-->
+<!--{% for item in fieldset_item[1].get('fields') %}-->
+<!--{% if item not in exclude_cols %}-->
+<!--<tr>-->
+<!--{{ lib.render_field(form[item], begin_sep_label, end_sep_label, begin_sep_field, end_sep_field) }}-->
+<!--</tr>-->
+<!--{% endif %}-->
+<!--{% endfor %}-->
+<!--</table>-->
+<!--</div>-->
+<!--{% endcall %}-->
+<!--{% endfor %}-->
+<!--{% else %}-->
+<!--<div class="table-responsive">-->
+<!--<table class="table table-bordered">-->
+<!--{% for col in include_cols %}-->
+<!--{% set field = form[col] %}-->
+<!--{% if field.name not in exclude_cols %}-->
+<!--<tr>-->
+<!--{{ lib.render_field(field, begin_sep_label, end_sep_label, begin_sep_field, end_sep_field) }}-->
+<!--</tr>-->
+<!--{% endif %}-->
+<!--{% endfor %}-->
+<!--</table>-->
+<!--</div>-->
+<!--{% endif %}-->
+
+<!--{{ lib.render_form_controls() }}-->
+
+<!--</form>-->
+

@@ -1,0 +1,40 @@
+{% extends 'appbuilder/baselayout.html' %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+    .record{
+   position: absolute; left: 50%;
+   transform: translate(-50%, -50%);
+    bottom:0px;
+    }
+    .s-bottom-recordcode{
+     color: #999999;
+    }
+
+
+
+</style>
+<!--<style>-->
+<!--    body{-->
+<!--    background-image:url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1574948834906&di=a267384e18cccafffedfc5a82006db02&imgtype=0&src=http%3A%2F%2Fpic.nipic.com%2F2008-05-28%2F200852811556476_2.jpg')-->
+<!--    }-->
+
+<!--</style>-->
+<!--<link rel="stylesheet" href="https://bootswatch.com/4/slate/_bootswatch.scss"></link>-->
+<link rel="shortcut icon" href="https://wsblogs.oss-cn-beijing.aliyuncs.com/static_blogs/bitbug_favicon.ico"
+      type="image/x-icon"/>
+<link rel="stylesheet" href="https://wsblogs.oss-cn-beijing.aliyuncs.com/static_blogs/base_mobile.css"/>
+
+{% block footer %}
+<footer>
+    <div class="img-rounded nav-fixed-bottom">
+        <div class="container">
+            <!--            {% include 'appbuilder/footer.html' %}-->
+        </div>
+    </div>
+</footer>
+
+{% endblock %}
+{% endblock %}
+
